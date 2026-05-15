@@ -1,0 +1,28 @@
+# Environments
+.env
+venv/
+.venv/
+env/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Project folders contents (Keep the folders via .gitkeep but ignore content)
+knowledge_base/*
+!knowledge_base/.gitkeep
+
+chroma_db_v2/*
+!chroma_db_v2/.gitkeep
+
+outputs/*
+!outputs/.gitkeep
+
+# VSCode / System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
