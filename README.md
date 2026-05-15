@@ -1,12 +1,16 @@
 # 🎓 AI Research Assistant Agent (Terminal Edition) 
 
-> **💡 فرع التطوير الحالي:** `MARWAN` (نسخة التيرمنال)
+> **💡 فرع التطوير الحالي / Current Active Branch:** `MARWAN`
+
+---
+
+## 🇸🇦 اللغة العربية (Arabic Version)
 
 مرحباً بك في مشروع **مساعد البحث الأكاديمي الذكي**. هذا المستودع مخصص لبناء عميل ذكي مستقل (Autonomous Agent) قادر على البحث في المصادر المحلية الموثقة ودمجها مع محركات البحث المباشرة لإنتاج تقارير علمية رصينة، دقيقة، ومُدققة آلياً ضد الهلوسة الأكاديمية.
 
 ---
 
-## 🗺️ خارطة الطريق للمشروع (Roadmap)
+### 🗺️ خارطة الطريق للمشروع (Roadmap)
 تم تقسيم تطوير هذا المشروع إلى 3 مراحل رئيسية عبر فروع منفصلة في Git:
 1.  **فرع `MARWAN` (الحالي):** نسخة سطر الأوامر (Terminal Interface) المتكاملة، تركز على استقرار المحرك والذكاء الاصطناعي وتدقيق المعلومات.
 2.  **الفرع الثاني (قريباً):** واجهة مستخدم محلية فاخرة (Local Web GUI/Dashboard) باستخدام FastAPI و React.
@@ -14,7 +18,7 @@
 
 ---
 
-## 📥 التحميل السريع واختصار الوقت (Fast-Track Download)
+### 📥 التحميل السريع واختصار الوقت (Fast-Track Download)
 إذا أردت البدء فوراً وتجربة البرنامج دون الحاجة لانتظار سحب الأوراق العلمية وبناء قاعدة المتجهات، قمنا بتوفير **مجلد مضغوط جاهز للتحميل** يحتوي على:
 *   📂 **`chroma_db_v2`:** قاعدة المتجهات المبنية بالكامل لـ 120+ بحث علمي.
 *   📂 **`knowledge_base`:** الأوراق البحثية الكاملة بصيغة PDF.
@@ -26,7 +30,7 @@
 
 ---
 
-## 🧠 كيف يعمل النظام؟ (System Architecture)
+### 🧠 كيف يعمل النظام؟ (System Architecture)
 يعتمد المحرك على معمارية **LangGraph** بـ 3 عقد متصلة تضمن جودة التقرير:
 
 1.  **العقدة الأولى (Researcher):** 
@@ -38,7 +42,7 @@
 
 ---
 
-## 📁 تشريح ملفات المشروع (Project Structure)
+### 📁 تشريح ملفات المشروع (Project Structure)
 
 *   **`main_app.py`**: المحرك الأساسي والتنفيذي للمشروع والربط بين العقد الثلاث وتوليد التقارير وحفظها.
 *   **`arxiv_tool.py`**: أداة البحث المباشر في مستودع الأبحاث العالمي مع حماية مدمجة ضد الحظر (Rate Limit Shield).
@@ -49,36 +53,152 @@
 
 ---
 
-## 🚀 خطوات التشغيل والتجربة (How to Run)
+### 🚀 خطوات التشغيل والتجربة (How to Run)
 
-### 1. تجهيز البيئة وتثبيت المكتبات
-قم بفتح الترمينال داخل مجلد المشروع ثم نفّذ:
+#### خطوة 0: تحميل الكود وفتحه في الـ IDE
+قم بفتح الترمينال على جهازك (أو داخل VSCode / PyCharm) ونفذ ما يلي لنسخ المشروع والانتقال للفرع الصحيح:
+```bash
+# 1. نسخ المشروع من قيت هب
+git clone https://github.com/Marwan915/AI-Research-Assistant-Agent.git
+
+# 2. الدخول لمجلد المشروع
+cd AI-Research-Assistant-Agent
+
+# 3. الانتقال إلى فرع التيرمنال (مهم جداً!)
+git checkout MARWAN
+```
+بعد ذلك، افتح المجلد باستخدام محررك المفضل (مثل `code .` لـ VSCode).
+
+#### خطوة 1: تجهيز البيئة وتثبيت المكتبات
+داخل الترمينال الخاص بالـ IDE، أنشئ البيئة الافتراضية وثبّت المكتبات:
 ```bash
 # إنشاء بيئة افتراضية
 python -m venv venv
 
-# تفعيل البيئة (Windows)
+# تفعيل البيئة (نظام ويندوز)
 .\venv\Scripts\activate
 
 # تثبيت المكتبات المطلوبة
 pip install -r requirements.txt
 ```
 
-### 2. إعداد مفاتيح الـ API
-قم بنسخ ملف `.env.example` وتغيير اسمه إلى `.env` وضع مفتاح Gemini API الخاص بك:
+#### خطوة 2: إعداد مفاتيح الـ API
+قم بنسخ ملف `.env.example` وتغيير اسمه إلى `.env` ثم ضع مفتاح Gemini API الحقيقي الخاص بك:
 ```env
 GOOGLE_API_KEY=your_real_api_key_here
 ```
 
-### 3. تشغيل النموذج المحلي (Ollama)
-قم بتحميل ملف الموديل المصغر من مجلد Drive وقم بإنشاء موديل في Ollama باسم `SciAssistant`:
+#### خطوة 3: تشغيل النموذج المحلي (Ollama)
+بعد تحميل ملفات الموديل المصغر من رابط قوقل درايف ووضعها في مجلد المشروع، قم بفتح Terminal جديد وشغل الأوامر الآتية لبناء النموذج في Ollama تحت اسم `SciAssistant`:
 ```bash
+# بناء النموذج المحلي
 ollama create SciAssistant -f Modelfile
 ```
 
-### 4. تشغيل محرك البحث الذكي!
-كل شيء جاهز الآن! فقط قم بتشغيل البرنامج واستمتع بأقوى أداة بحثية في سطر الأوامر:
+#### خطوة 4: إطلاق محرك البحث الذكي!
+الآن قم بتشغيل البرنامج الرئيسي واستمتع بالتجربة:
 ```bash
 python main_app.py
 ```
-سيقوم النظام بحفظ التقارير النهائية تلقائياً وبصيغة منظمة في مجلد **`outputs/`** لتتمكن من قراءتها كملفات Markdown غنية بالمعادلات!
+سيقوم النظام بحفظ التقارير النهائية تلقائياً في مجلد **`outputs/`** كملفات Markdown غنية.
+
+---
+---
+
+## 🇺🇸 English Version
+
+Welcome to the **AI Research Assistant Agent** project. This repository hosts an autonomous intelligent agent designed to perform hybrid searches across local verified sources and live academic databases, synthesizing extensive, hallucination-free scientific reports.
+
+---
+
+### 🗺️ Project Roadmap
+Development is split across three core phases, separated by Git branches:
+1.  **`MARWAN` Branch (Current):** Fully functional Terminal/CLI edition focusing on engine stability, prompt safety, and rigorous citation auditing.
+2.  **Second Phase (Coming Soon):** Local premium Web GUI/Dashboard powered by FastAPI & React.
+3.  **Third Phase (Later):** Hosted SaaS Production deployment for public usage.
+
+---
+
+### 📥 Fast-Track Execution (Pre-built Dataset)
+To skip the lengthy process of downloading academic papers and constructing the vector embedding database, we provide a **pre-packaged ZIP archive** containing:
+*   📂 **`chroma_db_v2`:** Fully compiled vector database with 120+ pre-vectorized papers.
+*   📂 **`knowledge_base`:** Corresponding PDF documents.
+*   🤖 **`My_AI_Agent`:** Pre-configured fine-tuned local GGUF model files for instant Ollama hosting.
+
+🔗 **[Download Pre-built Assets from Google Drive Here](https://drive.google.com/file/d/1y8kXvZtC7J85kDe5gAQQ6W4QP8stvotv/view?usp=sharing)**
+
+> **💡 Usage:** Simply extract the downloaded ZIP file and place the `chroma_db_v2` and `knowledge_base` directories directly into the root of the project directory.
+
+---
+
+### 🧠 System Architecture
+The engine coordinates a **3-Node LangGraph** pipeline to enforce scientific rigor:
+
+1.  **Node 1 (Researcher):** 
+    Powered by `gemini-3.1-flash-lite`. Translates user input, extracts precise search keywords, inspects the local RAG database alongside ArXiv API endpoints, and synthesizes a raw fact-verified skeleton.
+2.  **Node 2 (Writer):** 
+    Completely local node utilizing `SciAssistant` hosted via Ollama. It drafts the extensive academic report, formatting advanced mathematical derivations in clean LaTeX syntax.
+3.  **Node 3 (Validator / Auditor):** 
+    The compliance gatekeeper. It audits the draft, matching every hallucinated citation to a real source from Node 1 via JSON mapping, automatically correcting discrepancies using Python and Regex logic to yield 100% verifiable final reports.
+
+---
+
+### 📁 Project Structure Breakdown
+
+*   **`main_app.py`**: The core execution controller managing LangGraph node execution, configuration, and file operations.
+*   **`arxiv_tool.py`**: Custom Search tool querying the ArXiv registry with custom built-in rate-limit defenses.
+*   **`automated_ingestion.py`**: Automatic batch downloader scraping target CS papers from ArXiv to populate the knowledge base.
+*   **`build_rag_v2.py`**: The indexing engine chunking texts and vectorizing them via `BAAI/bge-base-en-v1.5` into a high-performance ChromaDB persistent store.
+*   **`archive_old_experiments/llm_as_judge_eval.py`**: Automated evaluation benchmark utilizing batch calls to Gemini for cost-efficient performance grading.
+*   **`.gitignore` / `.gitkeep`**: Professional workspace configuration files restricting giant binaries from being uploaded to source control.
+
+---
+
+### 🚀 How to Run and Test
+
+#### Step 0: Clone the Repository and Open IDE
+Launch your local Terminal (or VSCode/PyCharm terminal) and run the following commands to clone the repo and switch to the correct branch:
+```bash
+# 1. Clone the repo
+git clone https://github.com/Marwan915/AI-Research-Assistant-Agent.git
+
+# 2. Change directory
+cd AI-Research-Assistant-Agent
+
+# 3. Checkout to the Terminal edition branch (Crucial!)
+git checkout MARWAN
+```
+Afterwards, open the folder inside your preferred IDE (e.g., `code .` for VSCode).
+
+#### Step 1: Environment Setup
+Create a virtual environment and install project dependencies:
+```bash
+# Create Virtual Environment
+python -m venv venv
+
+# Activate Virtual Environment (Windows)
+.\venv\Scripts\activate
+
+# Install necessary libraries
+pip install -r requirements.txt
+```
+
+#### Step 2: Configure Environment Variables
+Copy the `.env.example` file, rename the new file to `.env`, and input your official Gemini API key:
+```env
+GOOGLE_API_KEY=your_real_api_key_here
+```
+
+#### Step 3: Instantiate Local LLM (Ollama)
+After downloading the model asset from the Google Drive link provided above, open a Terminal window and run the creation command to register `SciAssistant` into your local Ollama instance:
+```bash
+# Build model configuration
+ollama create SciAssistant -f Modelfile
+```
+
+#### Step 4: Run the Application
+Everything is perfectly configured. Run the main application loop:
+```bash
+python main_app.py
+```
+Generated markdown reports will be automatically archived with accurate timestamps in the **`outputs/`** directory for structured viewing.
