@@ -1,6 +1,6 @@
 # 🎓 AI Research Assistant Agent (Terminal Edition) 
 
-> **💡 فرع التطوير الحالي / Current Active Branch:** `MARWAN`
+> **💡 فرع التطوير الحالي / Current Active Branch:** `Terminal-Edition`
 
 ---
 
@@ -12,7 +12,7 @@
 
 ### 🗺️ خارطة الطريق للمشروع (Roadmap)
 تم تقسيم تطوير هذا المشروع إلى 3 مراحل رئيسية عبر فروع منفصلة في Git:
-1.  **فرع `MARWAN` (الحالي):** نسخة سطر الأوامر (Terminal Interface) المتكاملة، تركز على استقرار المحرك والذكاء الاصطناعي وتدقيق المعلومات.
+1.  **فرع `Terminal-Edition` (الحالي):** نسخة سطر الأوامر (Terminal Interface) المتكاملة، تركز على استقرار المحرك والذكاء الاصطناعي وتدقيق المعلومات.
 2.  **الفرع الثاني (قريباً):** واجهة مستخدم محلية فاخرة (Local Web GUI/Dashboard) باستخدام FastAPI و React.
 3.  **الفرع الثالث (لاحقاً):** النسخة السحابية الكاملة المتاحة للجميع (Hosted Online SaaS Production).
 
@@ -65,7 +65,7 @@ git clone https://github.com/Marwan915/AI-Research-Assistant-Agent.git
 cd AI-Research-Assistant-Agent
 
 # 3. الانتقال إلى فرع التيرمنال (مهم جداً!)
-git checkout MARWAN
+git checkout Terminal-Edition
 ```
 بعد ذلك، افتح المجلد باستخدام محررك المفضل (مثل `code .` لـ VSCode).
 
@@ -113,7 +113,7 @@ Welcome to the **AI Research Assistant Agent** project. This repository hosts an
 
 ### 🗺️ Project Roadmap
 Development is split across three core phases, separated by Git branches:
-1.  **`MARWAN` Branch (Current):** Fully functional Terminal/CLI edition focusing on engine stability, prompt safety, and rigorous citation auditing.
+1.  **`Terminal-Edition` Branch (Current):** Fully functional Terminal/CLI edition focusing on engine stability, prompt safety, and rigorous citation auditing.
 2.  **Second Phase (Coming Soon):** Local premium Web GUI/Dashboard powered by FastAPI & React.
 3.  **Third Phase (Later):** Hosted SaaS Production deployment for public usage.
 
@@ -166,7 +166,7 @@ git clone https://github.com/Marwan915/AI-Research-Assistant-Agent.git
 cd AI-Research-Assistant-Agent
 
 # 3. Checkout to the Terminal edition branch (Crucial!)
-git checkout MARWAN
+git checkout Terminal-Edition
 ```
 Afterwards, open the folder inside your preferred IDE (e.g., `code .` for VSCode).
 
