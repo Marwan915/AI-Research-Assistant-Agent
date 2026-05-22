@@ -180,11 +180,11 @@ def _render_sidebar():
 **Node 1 — Researcher**
 - Gemini (auto-fallback)
 - Query translation (AR/EN)
-- Local RAG + ArXiv search
+- Local RAG, ArXiv & Web (Tavily/Wiki)
 
 **Node 2 — Writer**
 - SciAssistant (Ollama local)
-- LaTeX math formatting
+- Markdown academic formatting
 - Real-time streaming
 
 **Node 3 — Validator**
@@ -198,6 +198,7 @@ def _render_sidebar():
 3. gemini-2.5-flash-lite ⭐⭐⭐
 4. gemini-2.0-flash ⭐⭐
 5. gemini-1.5-flash ⭐
+6. gemini-2.0-flash-lite ⚪
 """
             )
 
@@ -209,19 +210,19 @@ def _render_sidebar():
                 """
 <div style="padding-top: 5px; padding-bottom: 5px; margin-left: 5px;">
     <div style="margin-bottom: 5px; text-align: center;">
-        <div style="font-weight: 600; font-size: 0.85em; background-color: rgba(100, 100, 255, 0.1); padding: 8px; border-radius: 8px; border: 1px solid rgba(100, 100, 255, 0.2);">🌍 Translation Layer<br><span style="font-size: 0.8em; color: var(--text-muted); font-weight: 400;">Gemini 2.5 Flash: Translates AR → EN</span></div>
+        <div style="font-weight: 600; font-size: 0.85em; background-color: rgba(100, 100, 255, 0.1); padding: 8px; border-radius: 8px; border: 1px solid rgba(100, 100, 255, 0.2);">🌍 Translation Layer<br><span style="font-size: 0.8em; color: var(--text-muted); font-weight: 400;">Gemini Router: Translates AR → EN</span></div>
     </div>
     <div style="text-align: center; color: var(--text-muted); margin-bottom: 5px; font-size: 1.2em;">↓</div>
     <div style="margin-bottom: 5px; text-align: center;">
-        <div style="font-weight: 600; font-size: 0.85em; background-color: rgba(100, 255, 100, 0.1); padding: 8px; border-radius: 8px; border: 1px solid rgba(100, 255, 100, 0.2);">🧠 Intelligent Router<br><span style="font-size: 0.8em; color: var(--text-muted); font-weight: 400;">Queries: DuckDuckGo, Wikipedia, ArXiv, RAG</span></div>
+        <div style="font-weight: 600; font-size: 0.85em; background-color: rgba(100, 255, 100, 0.1); padding: 8px; border-radius: 8px; border: 1px solid rgba(100, 255, 100, 0.2);">🧠 Intelligent Router<br><span style="font-size: 0.8em; color: var(--text-muted); font-weight: 400;">Queries: Tavily, Wikipedia, ArXiv, Local RAG</span></div>
     </div>
     <div style="text-align: center; color: var(--text-muted); margin-bottom: 5px; font-size: 1.2em;">↓</div>
     <div style="margin-bottom: 5px; text-align: center;">
-        <div style="font-weight: 600; font-size: 0.85em; background-color: rgba(255, 150, 50, 0.1); padding: 8px; border-radius: 8px; border: 1px solid rgba(255, 150, 50, 0.2);">🦴 Synthesis<br><span style="font-size: 0.8em; color: var(--text-muted); font-weight: 400;">Gemini 2.5 Flash: Distills data into Fact Skeleton</span></div>
+        <div style="font-weight: 600; font-size: 0.85em; background-color: rgba(255, 150, 50, 0.1); padding: 8px; border-radius: 8px; border: 1px solid rgba(255, 150, 50, 0.2);">🦴 Synthesis<br><span style="font-size: 0.8em; color: var(--text-muted); font-weight: 400;">Gemini Router: Distills data into Fact Skeleton</span></div>
     </div>
     <div style="text-align: center; color: var(--text-muted); margin-bottom: 5px; font-size: 1.2em;">↓</div>
     <div style="margin-bottom: 5px; text-align: center;">
-        <div style="font-weight: 600; font-size: 0.85em; background-color: rgba(255, 50, 100, 0.1); padding: 8px; border-radius: 8px; border: 1px solid rgba(255, 50, 100, 0.2);">✍️ Final Generation<br><span style="font-size: 0.8em; color: var(--text-muted); font-weight: 400;">SciAssistant (Local) or Gemini Flash Lite</span></div>
+        <div style="font-weight: 600; font-size: 0.85em; background-color: rgba(255, 50, 100, 0.1); padding: 8px; border-radius: 8px; border: 1px solid rgba(255, 50, 100, 0.2);">✍️ Final Generation<br><span style="font-size: 0.8em; color: var(--text-muted); font-weight: 400;">SciAssistant (Local) or Gemini Router (Fallback)</span></div>
     </div>
 </div>
 """, unsafe_allow_html=True

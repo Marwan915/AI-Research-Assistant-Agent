@@ -5,14 +5,16 @@ Creates a transient ChromaDB collection in RAM for the currently uploaded PDF.
 Supports auto-summarization and contextual Q&A.
 The collection is destroyed when the Streamlit session ends.
 
-FIXES:
-  - Removed circular import: no longer imports from core.agent
-  - _text() helper is now self-contained
-  - Correctly handles chromadb.Client() deprecation (use EphemeralClient)
-  - n_results clamped to actual chunk count to avoid chromadb ValueError
-  - PDFChatSession.ask() now returns tuple consistently even on error
+FIXES & UPDATES:
+  - Orchestrator-Worker pattern for Literature Matrix and Auto-Summary
+  - ArXiv + Tavily dual-search for comprehensive literature review
+  - Strict LaTeX rules applied to prevent Streamlit rendering crashes
+  - In-Text Citation Mapping (Page numbers tracked)
+  - Data & Table Extraction feature added
 """
 
+import json
+import re
 from typing import List, Optional, Tuple
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
@@ -21,6 +23,9 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from gemini_router import GeminiRouter
 from core.rag_pipeline import DEFAULT_CHROMA_PATH
 from langchain_chroma import Chroma
+from arxiv_tool import search_arxiv
+from tavily import TavilyClient
+import os
 
 
 def _text(content) -> str:
@@ -36,15 +41,17 @@ def _text(content) -> str:
         )
     return str(content)
 
+def _extract_json(text: str) -> str:
+    """Helper to extract JSON from a markdown code block if present."""
+    match = re.search(r'```(?:json)?\s*(.*?)\s*```', text, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return text.strip()
+
 
 class PDFChatSession:
     """
     Manages an in-memory vector store for a single uploaded PDF.
-
-    Usage:
-        session = PDFChatSession(embedding_model=agent.embedding_model)
-        summary = session.load_pdf("/tmp/paper.pdf")
-        answer, passages = session.ask("What methodology was used?")
     """
 
     def __init__(
@@ -65,6 +72,9 @@ class PDFChatSession:
         self._filenames: List[str] = []
         self._full_text: str = ""
         self._is_loaded = False
+        
+        tavily_key = os.environ.get("TAVILY_API_KEY")
+        self._tavily_client = TavilyClient(api_key=tavily_key) if tavily_key else None
 
     # ── Properties ────────────────────────────
     @property
@@ -112,7 +122,13 @@ class PDFChatSession:
                 
             doc_name = filenames[idx]
             for doc in documents:
-                doc.page_content = f"[SOURCE: {doc_name}]\n{doc.page_content}"
+                # 4. NEW FEATURE: In-Text Citation Mapping (Page numbers)
+                page_num = doc.metadata.get('page', 0)
+                if isinstance(page_num, int):
+                    page_num += 1 # PyPDFLoader is 0-indexed
+                
+                chunk_header = f"[SOURCE: {doc_name} | PAGE: {page_num}]"
+                doc.page_content = f"{chunk_header}\n{doc.page_content}"
                 self._full_text += f"\n{doc.page_content}"
 
         if not self._full_text:
@@ -122,90 +138,139 @@ class PDFChatSession:
         return self._auto_summarize()
 
     def _auto_summarize(self) -> str:
-        """Generate an automatic briefing of the uploaded PDFs."""
-        # Use first ~3500 chars — enough for abstract + intro
-        preview = self._full_text[:3500]
+        """Generate an automatic briefing of the uploaded PDFs using Orchestrator-Worker pattern."""
+        preview = self._full_text[:6000]
 
-        prompt = f"""You are an expert academic research assistant. A researcher just uploaded scientific papers.
-Analyze the excerpt below and provide a structured briefing:
+        # STEP 1: Orchestrator (Extract structured JSON)
+        orchestrator_prompt = f"""You are a scientific data extractor. Read the following paper excerpt and extract the core information into a strict JSON format.
+Output ONLY a JSON object with the following keys: "Core_Contribution", "Methodology", "Key_Results", "Relevance", "Extracted_Facts" (an array of specific claims with their page numbers if found).
 
-**1. Core Contribution** (2-3 sentences): What is the main idea or contribution?
-**2. Methodology** (1-2 sentences): What approach or method was used?
-**3. Key Results** (2-4 bullet points): What are the most important findings?
-**4. Relevance** (1 sentence): What field or problem does this address?
-
-End your response with exactly this line:
-> 💬 Feel free to ask me anything about these papers — equations, methodology, comparisons, or implications.
-
-Paper excerpt:
+Excerpt:
 ---
 {preview}
 ---"""
-
         try:
-            response = self._router.invoke(prompt)
-            return _text(response)
+            raw_response = self._router.invoke(orchestrator_prompt)
+            json_str = _extract_json(_text(raw_response))
+            # Just to validate it's parseable
+            json.loads(json_str)
         except Exception as e:
             return (
                 f"📄 **Papers loaded successfully** ({self.chunk_count} sections indexed).\n\n"
-                f"⚠️ Auto-summary failed: {e}\n\n"
+                f"⚠️ Auto-summary extraction failed: {e}\n\n"
                 f"> 💬 You can still ask questions about these papers."
             )
             
+        # STEP 2: Worker (Write the final summary)
+        writer_prompt = f"""You are an expert academic research assistant. 
+Use the following structured JSON data extracted from the user's uploaded documents to write a structured briefing.
+
+JSON DATA:
+{json_str}
+
+Format your output exactly as follows:
+**1. Core Contribution** (2-3 sentences): ...
+**2. Methodology** (1-2 sentences): ...
+**3. Key Results** (2-4 bullet points): ...
+**4. Relevance** (1 sentence): ...
+
+CRITICAL: Do NOT use block LaTeX (`$$`). Do NOT use mathematical symbols like +, =, or > on a separate line. Always embed math conversationally within the paragraph text using plain English where possible, or use simple inline `$` ONLY if absolutely necessary and mathematically sound.
+
+End your response with exactly this line:
+> 💬 Feel free to ask me anything about these papers — equations, methodology, comparisons, or implications.
+"""
+        try:
+            final_response = self._router.invoke(writer_prompt)
+            return _text(final_response)
+        except Exception as e:
+            return f"⚠️ Auto-summary writing failed: {e}"
+            
     def generate_literature_matrix_stream(self, llm):
-        """Generates a comparative literature review stream using the Heavy Writer LLM."""
+        """Generates a comparative literature review stream using the Orchestrator-Worker pattern and ArXiv+Tavily."""
         if not self._is_loaded:
             yield "No documents loaded."
             return
             
         extra_context = ""
-        # Smart Single-Paper Matrix
-        if len(self._filenames) == 1:
-            try:
-                # 1. Extract topic
-                topic_prompt = f"Extract a 3-5 word main topic or research area for this paper based on its excerpt. Output ONLY the topic.\n\nExcerpt:\n{self._full_text[:3000]}"
-                topic = _text(self._router.invoke(topic_prompt)).strip()
-                
-                # 2. Live ArXiv Search
-                try:
-                    from arxiv_tool import search_arxiv
-                    arxiv_res = search_arxiv.invoke({"query": topic, "max_results": 2})
-                    if arxiv_res and "No ArXiv papers found" not in arxiv_res and "error" not in arxiv_res.lower():
-                        extra_context += f"\n\n--- RELATED WORKS FROM ARXIV (Topic: {topic}) ---\n{arxiv_res}\n"
-                except Exception:
-                    pass
-                
-                # 3. Local RAG search excluding current
-                try:
-                    local_results = self._db.similarity_search(
-                        topic, 
-                        k=2, 
-                        filter={"source_name": {"$nin": self._filenames}}
-                    )
-                    if local_results:
-                        extra_context += f"\n\n--- RELATED WORKS FROM KNOWLEDGE BASE ---\n"
-                        for r in local_results:
-                            extra_context += f"Source: {r.metadata.get('source_name', 'Unknown')}\nContent: {r.page_content}\n\n"
-                except Exception:
-                    pass
-            except Exception as e:
-                print(f"Error in single-paper prep: {e}")
+        topic = ""
+        
+        # 1. Extract topic for searching
+        try:
+            topic_prompt = f"Extract a 3-5 word main topic or research area for this paper based on its excerpt. Output ONLY the topic.\n\nExcerpt:\n{self._full_text[:3000]}"
+            topic = _text(self._router.invoke(topic_prompt)).strip()
+        except Exception:
+            topic = "scientific research"
+
+        # 2. Dual Search: ArXiv (First/Academic) + Tavily (Second/Broad)
+        try:
+            arxiv_res = search_arxiv.invoke({"query": topic, "max_results": 2})
+            if arxiv_res and "No ArXiv papers found" not in arxiv_res and "error" not in arxiv_res.lower():
+                extra_context += f"\n\n--- RELATED WORKS FROM ARXIV (Topic: {topic}) ---\n{arxiv_res}\n"
+        except Exception:
+            pass
+
+        try:
+            if self._tavily_client:
+                tavily_res = self._tavily_client.search(f"{topic} latest research breakthroughs", max_results=2)
+                tavily_results = tavily_res.get('results', [])
+                if tavily_results:
+                    extra_context += f"\n\n--- RELATED WORKS FROM TAVILY (Topic: {topic}) ---\n"
+                    for r in tavily_results:
+                        extra_context += f"Title: {r['title']}\nURL: {r['url']}\nContent: {r['content'][:400]}\n\n"
+        except Exception:
+            pass
             
-        prompt = f"""[INST] <<SYS>>
-You are an expert academic assistant. Generate a Comparative Literature Review Matrix comparing the uploaded paper(s) to related works (if any provided) or to each other.
+        # STEP 1: Orchestrator (Extract JSON matrix)
+        yield "🧠 Analyzing paper and searching literature...\n\n"
+        orchestrator_prompt = f"""You are a scientific data orchestrator. Read the context and the external literature context, then extract a comparative analysis into a strict JSON format.
+Output ONLY a JSON array of objects. Each object should represent a paper (either the uploaded paper or an external one) with keys: "Source", "Core_Contribution", "Methodology", "Key_Results", "Limitations", "URLs".
+
+Context Excerpt (Uploaded Paper):
+{self._full_text[:8000]}
+
+External Context (ArXiv + Tavily):
+{extra_context}"""
+        
+        try:
+            raw_response = self._router.invoke(orchestrator_prompt)
+            json_str = _extract_json(_text(raw_response))
+            json.loads(json_str) # Validate
+        except Exception as e:
+            yield f"❌ Orchestrator failed to extract matrix data: {e}"
+            return
+
+        # STEP 2: Heavy Writer LLM (Streams final output)
+        writer_prompt = f"""[INST] <<SYS>>
+You are an expert academic assistant. Generate a formal Comparative Literature Review Matrix comparing the uploaded paper(s) to related works.
+You MUST base your output STRICTLY on the following structured JSON data.
+
+JSON DATA:
+{json_str}
+
 Create a Markdown table with the following columns:
 | Source/Paper | Core Contribution | Methodology | Key Results | Limitations |
 
-Make sure to be detailed, analytical, and draw deep academic comparisons. Do not just summarize; explicitly contrast their approaches.
+After the table, write 1-2 paragraphs of deep academic comparison explicitly contrasting their approaches.
+If URLs are provided in the JSON, include them as references below the table.
+
+CRITICAL: You MUST conclude your response with a ### References section. You must list the URLs from Tavily and ArXiv that the Orchestrator provided to you. If you generated a comparative analysis, you must cite the external papers/links used.
+When listing References at the end, you MUST format every URL as a clickable Markdown link using this exact syntax: - [Author/Title](URL). Never output raw URLs without the markdown brackets.
+
+CRITICAL INSTRUCTION: DO NOT use any conversational filler or introductory phrases (e.g., do not say 'Here is the matrix' or 'Sure'). Output ONLY the raw Markdown table and the subsequent analysis.
+
+CRITICAL: Do NOT use block LaTeX (`$$`). Do NOT use mathematical symbols like +, =, or > on a separate line. Always embed math conversationally within the paragraph text using plain English where possible, or use simple inline `$` ONLY if absolutely necessary and mathematically sound.
 <</SYS>>
-Context Excerpts (first 12,000 characters):
-{self._full_text[:12000]}
-{extra_context}
 [/INST]"""
         
-        for chunk in llm.stream(prompt):
-            yield chunk
-        
+        try:
+            for chunk in llm.stream(writer_prompt):
+                yield chunk
+        except Exception as e:
+            yield f"\n❌ Writer failed: {e}"
+
+
+
+
     def extract_concept_graph(self) -> dict:
         """Extract a semantic graph using Gemini."""
         prompt = f"""Extract 5-8 key mathematical or scientific concepts from the following abstract and map them to their related topics to form a knowledge graph.
@@ -218,8 +283,6 @@ Format:
     ]
 }}
 Abstract: {self._full_text[:3000]}"""
-        import json
-        import re
         try:
             response = self._router.invoke(prompt)
             raw_json = _text(response).strip()
@@ -257,14 +320,6 @@ Abstract: {self._full_text[:3000]}"""
     ) -> Tuple[str, List[str]]:
         """
         Answer a question about the uploaded PDF.
-
-        Args:
-            question:      User's question
-            extra_context: Optional context from external RAG/ArXiv
-            n_passages:    Number of passages to retrieve
-
-        Returns:
-            (answer_text, source_passages_list)
         """
         if not self._is_loaded:
             return (
@@ -287,24 +342,25 @@ Abstract: {self._full_text[:3000]}"""
 
         extra_block = ""
         if extra_context:
-            extra_block = f"\n\nEXTERNAL CONTEXT (from knowledge base / ArXiv):\n{extra_context}"
+            extra_block = f"\n\nEXTERNAL CONTEXT:\n{extra_context}"
 
         prompt = f"""You are an expert academic assistant helping a researcher understand a scientific paper.
 
 QUESTION: {question}
 
-PDF PASSAGES (retrieved by semantic search):
+PDF PASSAGES (retrieved by semantic search, includes source and page number):
 {passages_text}{extra_block}
 
 INSTRUCTIONS:
 - Use the provided passages as your primary source of truth.
+- IN-TEXT CITATION: Whenever you make a claim based on a passage, you MUST append the Page Number or Chunk ID to the end of the sentence (e.g., "According to the methodology... [PAGE: 4]").
 - If the user asks for a comparison, synthesis, or deeper analysis, use your extensive academic knowledge to draw connections and infer conclusions even if they are not explicitly spelled out in the text.
-- Use $...$ for inline math and $$...$$ for block equations.
 - Cite passages by number: [Passage 1], [Passage 2], etc.
 - If the passages are completely irrelevant, clearly say "I couldn't find an exact answer in the text, but based on my knowledge..." and provide an answer.
 - Answer in the same language as the question.
 - Keep the tone precise and academic.
-- If the question asks for an equation, reproduce it in LaTeX
+
+CRITICAL: Do NOT use block LaTeX (`$$`). Do NOT use mathematical symbols like +, =, or > on a separate line. Always embed math conversationally within the paragraph text using plain English where possible, or use simple inline `$` ONLY if absolutely necessary and mathematically sound.
 
 Answer:"""
 
@@ -324,3 +380,4 @@ Answer:"""
     def reset(self):
         """Public cleanup — call when switching to a new PDF or clearing session."""
         self._cleanup()
+

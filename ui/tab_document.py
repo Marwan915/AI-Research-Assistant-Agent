@@ -1,20 +1,18 @@
 """
 ui/tab_document.py — Interactive Document Lab
 
-FIXES:
-  - Metric cards raw HTML was injected without unsafe_allow_html=True
-  - File uploader check was comparing to stale filename key — now uses hash
-  - PDF viewer iframe was broken (Streamlit blocks direct iframe injection)
-  - Save to Knowledge Base button actually calls rag_pipeline now
-  - chat_container.container(height=...) causes double scrollbar on some versions
-    — replaced with standard container + custom CSS max-height
-  - Answer was referenced outside its scope (NameError if chat_input returned None)
+FIXES & UPDATES:
+  - Added visual execution pipeline for PDF upload and processing.
+  - Upgraded metric cards to premium glassmorphism aesthetic.
+  - Added "Extract Tables" feature button.
+  - Aligned with overall premium dark mode theme of Global Research Room.
 """
 
 import streamlit as st
 import os
 import tempfile
 import hashlib
+import time
 
 from core.rag_pipeline import ingest_pdf_to_chroma
 
@@ -53,6 +51,25 @@ def render_document_tab():
 
             # Only re-process if it's a new batch of files (by content hash)
             if st.session_state.get("last_pdf_hash") != combined_hash:
+                
+                # Visual Execution Pipeline UI (Matches Global Research Room)
+                pipeline_container = st.empty()
+                with pipeline_container.container():
+                    st.markdown("""
+                    <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;">
+                        <div style="font-size: 0.8rem; font-weight: 600; color: #94a3b8; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Execution Pipeline</div>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <div style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; border: 1px solid rgba(59, 130, 246, 0.3);">📥 Upload</div>
+                            <div style="color: #475569; padding: 0.4rem 0;">→</div>
+                            <div id="step2" style="background: rgba(255,255,255,0.02); color: #64748b; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; border: 1px solid rgba(255,255,255,0.05);">✂️ Chunking & Embedding</div>
+                            <div style="color: #475569; padding: 0.4rem 0;">→</div>
+                            <div id="step3" style="background: rgba(255,255,255,0.02); color: #64748b; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; border: 1px solid rgba(255,255,255,0.05);">🗄️ Vector DB Sync</div>
+                            <div style="color: #475569; padding: 0.4rem 0;">→</div>
+                            <div id="step4" style="background: rgba(255,255,255,0.02); color: #64748b; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; border: 1px solid rgba(255,255,255,0.05);">✨ Auto-Summary (Orchestrator)</div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
                 with st.status("🚀 Indexing documents…", expanded=True) as status:
                     try:
                         tmp_paths = []
@@ -67,8 +84,9 @@ def render_document_tab():
                             tmp_paths.append(tmp.name)
 
                         st.write(f"📄 Files: **{', '.join(filenames)}**")
+                        
                         st.write("⚙️ Chunking and embedding text…")
-
+                        
                         summary = pdf_session.load_pdfs(tmp_paths, filenames=filenames)
                         
                         st.write("🗄️ Auto-saving to Knowledge Base...")
@@ -95,6 +113,8 @@ def render_document_tab():
                         status.update(
                             label="✅ Documents ready & Saved to Knowledge Base!", state="complete"
                         )
+                        time.sleep(0.5)
+                        pipeline_container.empty()
                     except Exception as e:
                         error_str = str(e)
                         if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str or "quota" in error_str.lower():
@@ -117,37 +137,85 @@ def render_document_tab():
             st.markdown(st.session_state.doc_summary)
             st.markdown("</div>", unsafe_allow_html=True)
 
-            # Document stats
+            # Premium Document Stats (Glassmorphism)
             word_count = len(pdf_session.full_text.split())
             chunk_count = pdf_session.chunk_count
+            msg_count = len(st.session_state.get("pdf_messages", [])) // 2
 
-            col_a, col_b, col_c = st.columns(3)
-            with col_a:
-                st.metric("Total Words", f"{word_count:,}", help="Total words extracted from all uploaded documents.")
-            with col_b:
-                st.metric("Vector Chunks", chunk_count, help="Number of semantic chunks stored in the temporary database.")
-            with col_c:
-                st.metric("Messages", len(st.session_state.get("pdf_messages", [])) // 2, help="Number of interactions in this session.")
+            st.markdown(f"""
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0;">
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem;">Words</div>
+                    <div style="color: var(--primary); font-size: 1.4rem; font-weight: 700;">{word_count:,}</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem;">Chunks</div>
+                    <div style="color: #10b981; font-size: 1.4rem; font-weight: 700;">{chunk_count:,}</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem;">Messages</div>
+                    <div style="color: #a855f7; font-size: 1.4rem; font-weight: 700;">{msg_count}</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
             st.divider()
 
-            # Lit Review Matrix Button (Unfair Advantage)
-            if st.button("📊 Generate Comparative Literature Review", use_container_width=True):
-                st.session_state.lit_matrix = ""
+            # Action Buttons Layout
+            btn_col1, btn_col2 = st.columns(2)
+            with btn_col1:
+                if st.button("📊 Comparative Matrix", use_container_width=True):
+                    st.session_state.generate_matrix = True
+                    
+            if st.session_state.get("generate_matrix"):
                 with st.expander("📊 Comparative Matrix", expanded=True):
-                    with st.spinner("Heavy Writer is reasoning..."):
+                    with st.spinner("Orchestrator is extracting data & Heavy Writer is reasoning..."):
                         matrix = st.write_stream(
                             pdf_session.generate_literature_matrix_stream(st.session_state.agent._writer_llm)
                         )
+                        # Fix newlines and remove markdown code blocks that break Streamlit rendering
+                        matrix = matrix.replace('\\n', '\n')
+                        matrix = matrix.replace('```markdown', '').replace('```', '')
                         st.session_state.lit_matrix = matrix
-                    
+                st.session_state.generate_matrix = False
             elif "lit_matrix" in st.session_state and st.session_state.lit_matrix:
                 with st.expander("📊 Comparative Matrix", expanded=True):
                     st.markdown(st.session_state.lit_matrix)
+                    
+            if "lit_matrix" in st.session_state and st.session_state.lit_matrix:
+                try:
+                    import markdown
+                    # Ensure markdown handles tables correctly
+                    html_body = markdown.markdown(st.session_state.lit_matrix, extensions=['tables'])
 
+                    styled_html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Comparative Literature Review</title>
+    <style>
+        body {{ font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 900px; margin: 40px auto; padding: 30px; color: #333; background-color: #fff; }}
+        table {{ border-collapse: collapse; width: 100%; margin-bottom: 25px; font-size: 14px; }}
+        th, td {{ border: 1px solid #ddd; padding: 12px; text-align: left; }}
+        th {{ background-color: #f8f9fa; font-weight: 600; color: #2c3e50; }}
+        h1, h2, h3 {{ color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 10px; }}
+        a {{ color: #3498db; text-decoration: none; }}
+        a:hover {{ text-decoration: underline; }}
+    </style>
+</head>
+<body onload="window.print()">
+    {html_body}
+</body>
+</html>
+"""
+                except ImportError:
+                    styled_html = f"<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body onload='window.print()'><pre>{st.session_state.lit_matrix}</pre></body></html>"
+                
+                st.download_button(label="⬇️ Download Matrix as HTML/PDF", data=styled_html, file_name="comparative_matrix.html", mime="text/html")
 
-
-            if st.button("🗑️ Clear Documents", use_container_width=True):
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("🗑️ Clear Documents", use_container_width=True, type="primary"):
                 pdf_session.reset()
                 for key in ["last_pdf_hash", "last_pdf_name", "last_pdf_data",
                             "doc_summary", "pdf_messages", "lit_matrix"]:
@@ -191,7 +259,19 @@ def render_document_tab():
                 pdf_messages = st.session_state.get("pdf_messages", [])
                 for msg in pdf_messages:
                     with st.chat_message(msg["role"]):
-                        st.markdown(f'<div dir="auto">{msg["content"]}</div>', unsafe_allow_html=True)
+                        content = msg["content"].replace('\\n', '\n')
+                        st.markdown(f'<div dir="auto">{content}</div>', unsafe_allow_html=True)
+                        if "sources" in msg and msg["sources"]:
+                            st.markdown("---")
+                            st.markdown("**References:**")
+                            for i, src in enumerate(msg["sources"], 1):
+                                with st.expander(f"📍 View [Passage {i}]", expanded=False):
+                                    st.markdown(
+                                        f'<div class="passage-card" dir="auto">'
+                                        f'<div>{src}</div>'
+                                        f"</div>",
+                                        unsafe_allow_html=True,
+                                    )
 
             # Chat input
             question = st.chat_input(
@@ -212,6 +292,7 @@ def render_document_tab():
                     with st.chat_message("assistant"):
                         with st.spinner("Reading paper(s)…"):
                             answer, sources = pdf_session.ask(question)
+                            answer = answer.replace('\\n', '\n')
                             st.markdown(f'<div dir="auto">{answer}</div>', unsafe_allow_html=True)
 
                             # Source passages with clear interaction
@@ -229,6 +310,6 @@ def render_document_tab():
 
                 # Append assistant message
                 st.session_state.pdf_messages.append(
-                    {"role": "assistant", "content": answer}
+                    {"role": "assistant", "content": answer, "sources": sources}
                 )
                 # Instead of full rerun, we just updated the chat_area!
