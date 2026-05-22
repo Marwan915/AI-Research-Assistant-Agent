@@ -1,4 +1,4 @@
-﻿aiohappyeyeballs==2.6.1
+aiohappyeyeballs==2.6.1
 aiohttp==3.13.5
 aiosignal==1.4.0
 annotated-doc==0.0.4
@@ -143,3 +143,12 @@ xxhash==3.7.0
 yarl==1.23.0
 zipp==3.23.1
 zstandard==0.25.0
+# --- Web UI Dependencies ---
+streamlit>=1.31.0
+pypdf>=4.0.0
+chromadb>=0.4.22
+torchvision>=0.15.0
+streamlit-agraph>=0.0.45
+plotly>=5.18.0
+
+duckduckgo-search>=8.1.1

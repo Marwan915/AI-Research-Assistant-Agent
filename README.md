@@ -1,6 +1,15 @@
 # 🎓 AI Research Assistant Agent (Terminal Edition) 
 
-> **💡 فرع التطوير الحالي / Current Active Branch:** `Terminal-Edition`
+> **💡 فرع التطوير الحالي / Current Active Branch:** `local-web-ui` (Premium Streamlit Interface)
+
+---
+
+### 🚀 تشغيل الواجهة الرسومية الجديدة (Launch Web UI)
+للحصول على أفضل تجربة بحث وتفاعل مع المستندات، قم بتشغيل الواجهة الرسومية الجديدة:
+```bash
+streamlit run app.py
+```
+*ملاحظة: نسخة سطر الأوامر (Terminal) لا تزال متاحة عبر `python main_app.py`.*
 
 ---
 

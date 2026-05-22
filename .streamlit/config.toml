@@ -1,0 +1,16 @@
+[server]
+runOnSave = false
+gatherUsageStats = false
+
+[runner]
+magicEnabled = false
+
+[theme]
+base="dark"
+primaryColor="#6366f1"
+backgroundColor="#0a0f1e"
+secondaryBackgroundColor="#1e293b"
+textColor="#f0f4ff"
+
+[client]
+showSidebarNavigation = true
