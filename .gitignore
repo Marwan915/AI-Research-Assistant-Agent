@@ -18,6 +18,9 @@ knowledge_base/*
 chroma_db_v2/*
 !chroma_db_v2/.gitkeep
 
+chroma_db_v3/*
+!chroma_db_v3/.gitkeep
+
 outputs/*
 !outputs/.gitkeep
 

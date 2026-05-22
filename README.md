@@ -21,8 +21,8 @@ streamlit run app.py
 
 ### 🗺️ خارطة الطريق للمشروع (Roadmap)
 تم تقسيم تطوير هذا المشروع إلى 3 مراحل رئيسية عبر فروع منفصلة في Git:
-1.  **فرع `Terminal-Edition` (الحالي):** نسخة سطر الأوامر (Terminal Interface) المتكاملة، تركز على استقرار المحرك والذكاء الاصطناعي وتدقيق المعلومات.
-2.  **الفرع الثاني (قريباً):** واجهة مستخدم محلية فاخرة (Local Web GUI/Dashboard) باستخدام FastAPI و React.
+1.  **فرع `Terminal-Edition`:** نسخة سطر الأوامر (Terminal Interface) المتكاملة.
+2.  **فرع `local-web-ui` (الحالي):** واجهة مستخدم محلية فاخرة (Local Web GUI/Dashboard) باستخدام Streamlit.
 3.  **الفرع الثالث (لاحقاً):** النسخة السحابية الكاملة المتاحة للجميع (Hosted Online SaaS Production).
 
 ---
@@ -73,8 +73,8 @@ git clone https://github.com/Marwan915/AI-Research-Assistant-Agent.git
 # 2. الدخول لمجلد المشروع
 cd AI-Research-Assistant-Agent
 
-# 3. الانتقال إلى فرع التيرمنال (مهم جداً!)
-git checkout Terminal-Edition
+# 3. الانتقال إلى فرع الواجهة الرسومية (مهم جداً!)
+git checkout local-web-ui
 ```
 بعد ذلك، افتح المجلد باستخدام محررك المفضل (مثل `code .` لـ VSCode).
 
@@ -107,7 +107,7 @@ ollama create SciAssistant -f Modelfile
 #### خطوة 4: إطلاق محرك البحث الذكي!
 الآن قم بتشغيل البرنامج الرئيسي واستمتع بالتجربة:
 ```bash
-python main_app.py
+streamlit run app.py
 ```
 سيقوم النظام بحفظ التقارير النهائية تلقائياً في مجلد **`outputs/`** كملفات Markdown غنية.
 
@@ -122,8 +122,8 @@ Welcome to the **AI Research Assistant Agent** project. This repository hosts an
 
 ### 🗺️ Project Roadmap
 Development is split across three core phases, separated by Git branches:
-1.  **`Terminal-Edition` Branch (Current):** Fully functional Terminal/CLI edition focusing on engine stability, prompt safety, and rigorous citation auditing.
-2.  **Second Phase (Coming Soon):** Local premium Web GUI/Dashboard powered by FastAPI & React.
+1.  **`Terminal-Edition` Branch:** Fully functional Terminal/CLI edition.
+2.  **`local-web-ui` Branch (Current):** Local premium Web GUI/Dashboard powered by Streamlit.
 3.  **Third Phase (Later):** Hosted SaaS Production deployment for public usage.
 
 ---
@@ -174,8 +174,8 @@ git clone https://github.com/Marwan915/AI-Research-Assistant-Agent.git
 # 2. Change directory
 cd AI-Research-Assistant-Agent
 
-# 3. Checkout to the Terminal edition branch (Crucial!)
-git checkout Terminal-Edition
+# 3. Checkout to the Web UI edition branch (Crucial!)
+git checkout local-web-ui
 ```
 Afterwards, open the folder inside your preferred IDE (e.g., `code .` for VSCode).
 
@@ -208,6 +208,6 @@ ollama create SciAssistant -f Modelfile
 #### Step 4: Run the Application
 Everything is perfectly configured. Run the main application loop:
 ```bash
-python main_app.py
+streamlit run app.py
 ```
 Generated markdown reports will be automatically archived with accurate timestamps in the **`outputs/`** directory for structured viewing.
