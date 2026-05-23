@@ -1,4 +1,4 @@
-# 🎓 AI Research Assistant Agent (Terminal Edition) 
+# 🎓 AI Research Assistant Agent (Web UI Edition) 
 
 > **💡 فرع التطوير الحالي / Current Active Branch:** `local-web-ui` (Premium Streamlit Interface)
 
