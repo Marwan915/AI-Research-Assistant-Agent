@@ -25,7 +25,7 @@ streamlit run app.py
 | :--- | :---: | :--- |
 | **المرحلة الأولى (Phase 1)** | | |
 | **1. التعديل على نموذج (SLM) باستخدام Unsloth/QLoRA** | ✔️ محقق | تم إنجاز التدريب والتعديل (Fine-Tuning) لنموذج `SciAssistant` مسبقاً عبر منصة Kaggle، والكود متوفر في مجلد `model_training/`. |
-| **2. اختيار مجموعة بيانات (Corpus) تناسب الفكرة** | ✔️ محقق | تم اختيار الأبحاث العلمية الأكاديمية (CS Papers) وبنينا عليها قاعدة بيانات المتجهات `chroma_db_v3` و `knowledge_base`. |
+| **2. اختيار مجموعة بيانات (Corpus) تناسب الفكرة** | ✔️ محقق | تم استخدام قاعدة بيانات `zd21/SciInstruct` من HuggingFace (تم سحب وتصفية 35,000 عينة تدريبية) لتدريب النموذج المصغر ليكون مساعداً بحثياً. |
 | **3. إجراء تقييم للنموذج (LLM as a judge)** | ✔️ محقق | تم بناء ملف `archive_old_experiments/llm_as_judge_eval.py` ليقوم بتقييم جودة إجابات النموذج المحلي آلياً (استخدمنا Gemini كـ Judge). |
 | **4. تحويل النموذج المصغر إلى وكيل عبر LangChain** | ✔️ محقق | النموذج المحلي `SciAssistant` يتم تشغيله عبر `OllamaLLM` ويعمل كعقدة (الكاتب/Writer) أساسية ضمن بيئة LangChain. |
 | **5. إدارة الحالة (State Management) بـ Pydantic** | ✔️ محقق | تم استخدام Pydantic لتعريف حالة الوكيل (في ملف `core/agent.py`) عبر الكلاس `class AgentState(BaseModel)`. |
@@ -149,7 +149,7 @@ Welcome to the **AI Research Assistant Agent** project. This repository hosts an
 | :--- | :---: | :--- |
 | **Phase 1** | | |
 | **1. Fine-tune an SLM using Unsloth/QLoRA** | ✔️ Achieved | The Fine-Tuning for the `SciAssistant` model was completed via Kaggle, and the code is available in the `model_training/` directory. |
-| **2. Pick a relevant text Corpus** | ✔️ Achieved | We selected Academic CS Papers and built our vector database `chroma_db_v3` and `knowledge_base` upon them. |
+| **2. Pick a relevant text Corpus** | ✔️ Achieved | We utilized the `zd21/SciInstruct` dataset from HuggingFace (sampling and filtering 35,000 training records) to fine-tune our SLM as a research assistant. |
 | **3. Do LLM as a judge evaluation** | ✔️ Achieved | We built `archive_old_experiments/llm_as_judge_eval.py` to automatically evaluate the local model's quality (using Gemini as the Judge). |
 | **4. Turn the SLM into an agent using LangChain** | ✔️ Achieved | The local `SciAssistant` model runs via `OllamaLLM` and acts as the core (Writer) node within the LangChain environment. |
 | **5. Use Pydantic for state management** | ✔️ Achieved | Pydantic was used to define the agent's state (in `core/agent.py`) via `class AgentState(BaseModel)`. |
