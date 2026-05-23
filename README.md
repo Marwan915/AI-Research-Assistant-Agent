@@ -19,6 +19,28 @@ streamlit run app.py
 
 ---
 
+### ✅ خريطة استيفاء متطلبات المشروع (Project Rubric Mapping)
+
+| الشرط / المهمة (Requirement) | الحالة (Status) | التفاصيل وأين تم تحقيقها في الكود (How it was achieved) |
+| :--- | :---: | :--- |
+| **المرحلة الأولى (Phase 1)** | | |
+| **1. التعديل على نموذج (SLM) باستخدام Unsloth/QLoRA** | ✔️ محقق | تم إنجاز التدريب والتعديل (Fine-Tuning) لنموذج `SciAssistant` مسبقاً عبر منصة Kaggle، والكود متوفر في مجلد `model_training/`. |
+| **2. اختيار مجموعة بيانات (Corpus) تناسب الفكرة** | ✔️ محقق | تم اختيار الأبحاث العلمية الأكاديمية (CS Papers) وبنينا عليها قاعدة بيانات المتجهات `chroma_db_v3` و `knowledge_base`. |
+| **3. إجراء تقييم للنموذج (LLM as a judge)** | ✔️ محقق | تم بناء ملف `archive_old_experiments/llm_as_judge_eval.py` ليقوم بتقييم جودة إجابات النموذج المحلي آلياً (استخدمنا Gemini كـ Judge). |
+| **4. تحويل النموذج المصغر إلى وكيل عبر LangChain** | ✔️ محقق | النموذج المحلي `SciAssistant` يتم تشغيله عبر `OllamaLLM` ويعمل كعقدة (الكاتب/Writer) أساسية ضمن بيئة LangChain. |
+| **5. إدارة الحالة (State Management) بـ Pydantic** | ✔️ محقق | تم استخدام Pydantic لتعريف حالة الوكيل (في ملف `core/agent.py`) عبر الكلاس `class AgentState(BaseModel)`. |
+| **6. مستودع Github مع وجود Branches (فروع)** | ✔️ محقق | المشروع مرفوع على مستودع قيت هب وفيه فروع متعددة تعكس العمل الجماعي مثل (`main`, `Terminal-Edition`, `local-web-ui`). |
+| | | |
+| **المرحلة الثانية (Phase 2)** | | |
+| **7. بناء Multi-agentic workflow باستخدام LangGraph** | ✔️ محقق | قلب النظام في `core/agent.py` يعتمد على `StateGraph` ويحتوي على 3 وكلاء (عقد): الباحث (Researcher)، الكاتب (Writer)، والمدقق (Validator). |
+| **8. دعم الذاكرة المتعددة (Multi-turn memory)** | ✔️ محقق | تم تفعيل الذاكرة باستخدام `MemorySaver` الخاص بـ LangGraph، مما يسمح بحفظ سياق المحادثة (Thread ID) لكل جلسة. |
+| **9. إدارة الحالة عبر Pydantic داخل مسار العمل** | ✔️ محقق | الوكلاء يمررون الـ `AgentState` المبني بـ Pydantic بينهم لضمان صحة البيانات (المدخلات، المخرجات، التقرير النهائي، الخ). |
+| **10. دمج نظام RAG داخل مسار العمل** | ✔️ محقق | العقدة الأولى (الوكيل الباحث) تستخدم تقنية RAG للبحث الدلالي داخل قاعدة البيانات المحلية `chroma_db_v3` لاستخراج الحقائق والنصوص. |
+| **11. معالجة الأخطاء والانهيارات (Error Handling)** | ✔️ محقق | نظامنا يحتوي على `GeminiRouter` الذي يقوم بعمل (Automatic Fallback) في حال فشل نموذج، ويحتوي `arxiv_tool.py` على حماية من الحظر (Rate Limit Shield 429). |
+| **12. تزويد الوكلاء بالأدوات (Tools) المناسبة** | ✔️ محقق | الوكلاء مجهزون بأدوات قوية جداً: أداة `search_arxiv` للبحث المباشر، وأدوات لقراءة الـ PDFs المحلية والتفاعل معها. |
+
+---
+
 ### 🗺️ خارطة الطريق للمشروع (Roadmap)
 تم تقسيم تطوير هذا المشروع إلى 3 مراحل رئيسية عبر فروع منفصلة في Git:
 1.  **فرع `Terminal-Edition`:** نسخة سطر الأوامر (Terminal Interface) المتكاملة.
@@ -118,6 +140,28 @@ streamlit run app.py
 ## 🇺🇸 English Version
 
 Welcome to the **AI Research Assistant Agent** project. This repository hosts an autonomous intelligent agent designed to perform hybrid searches across local verified sources and live academic databases, synthesizing extensive, hallucination-free scientific reports.
+
+---
+
+### ✅ Project Rubric Mapping
+
+| Requirement | Status | How it was achieved in the code |
+| :--- | :---: | :--- |
+| **Phase 1** | | |
+| **1. Fine-tune an SLM using Unsloth/QLoRA** | ✔️ Achieved | The Fine-Tuning for the `SciAssistant` model was completed via Kaggle, and the code is available in the `model_training/` directory. |
+| **2. Pick a relevant text Corpus** | ✔️ Achieved | We selected Academic CS Papers and built our vector database `chroma_db_v3` and `knowledge_base` upon them. |
+| **3. Do LLM as a judge evaluation** | ✔️ Achieved | We built `archive_old_experiments/llm_as_judge_eval.py` to automatically evaluate the local model's quality (using Gemini as the Judge). |
+| **4. Turn the SLM into an agent using LangChain** | ✔️ Achieved | The local `SciAssistant` model runs via `OllamaLLM` and acts as the core (Writer) node within the LangChain environment. |
+| **5. Use Pydantic for state management** | ✔️ Achieved | Pydantic was used to define the agent's state (in `core/agent.py`) via `class AgentState(BaseModel)`. |
+| **6. GitHub repo with branches for team members** | ✔️ Achieved | The project is hosted on GitHub with multiple branches reflecting teamwork (e.g., `main`, `Terminal-Edition`, `local-web-ui`). |
+| | | |
+| **Phase 2** | | |
+| **7. Build Multi-agentic workflow using LangGraph** | ✔️ Achieved | The system core in `core/agent.py` relies on a `StateGraph` containing 3 nodes: Researcher, Writer, and Validator. |
+| **8. Multi-turn memory support** | ✔️ Achieved | Memory is enabled using LangGraph's `MemorySaver`, allowing conversation context (Thread ID) to be saved per session. |
+| **9. State management via Pydantic in the workflow** | ✔️ Achieved | Agents pass the Pydantic-based `AgentState` between them to ensure data integrity (inputs, outputs, final reports, etc.). |
+| **10. RAG integration in the workflow** | ✔️ Achieved | The first node (Researcher) utilizes RAG for semantic search within the local `chroma_db_v3` database to extract facts. |
+| **11. Error Handling** | ✔️ Achieved | Our system features `GeminiRouter` for Automatic Fallback if a model fails, and `arxiv_tool.py` includes a Rate Limit Shield (HTTP 429). |
+| **12. Equip agents with appropriate Tools** | ✔️ Achieved | Agents are equipped with powerful tools: `search_arxiv` for live searching, and tools for reading and interacting with local PDFs. |
 
 ---
 
