@@ -58,6 +58,7 @@ streamlit run app.py
 *   **`automated_ingestion.py`**: سكريبت لسحب مئات الأوراق العلمية من ArXiv أوتوماتيكياً في تخصصات علوم الحاسب لتغذية مكتبتك.
 *   **`build_rag_v2.py`**: العقل المدبر لبناء قاعدة ChromaDB، يقوم بتقطيع النصوص دلالياً وتحويلها لمتجهات باستخدام نموذج `BAAI/bge-base-en-v1.5` الأكاديمي.
 *   **`archive_old_experiments/llm_as_judge_eval.py`**: نظام تقييم فائق الكفاءة؛ يقوم بقياس جودة 10 إجابات للنموذج المحلي دفعة واحدة عبر Gemini API لضمان ثبات الجودة الأكاديمية.
+*   **`model_training/`**: مجلد يحتوي على كود تدريب النموذج المصغر (Fine-Tuning) ببيانات علمية باستخدام Unsloth و QLoRA.
 *   **`.gitignore` / `.gitkeep`**: إعدادات احترافية لحماية المشروع وتسهيل العمل الجماعي دون رفع ملفات ثقيلة.
 
 ---
@@ -159,6 +160,7 @@ The engine coordinates a **3-Node LangGraph** pipeline to enforce scientific rig
 *   **`automated_ingestion.py`**: Automatic batch downloader scraping target CS papers from ArXiv to populate the knowledge base.
 *   **`build_rag_v2.py`**: The indexing engine chunking texts and vectorizing them via `BAAI/bge-base-en-v1.5` into a high-performance ChromaDB persistent store.
 *   **`archive_old_experiments/llm_as_judge_eval.py`**: Automated evaluation benchmark utilizing batch calls to Gemini for cost-efficient performance grading.
+*   **`model_training/`**: Directory containing the SLM Fine-Tuning Jupyter notebook leveraging Unsloth, QLoRA, and dynamic dataset fetching.
 *   **`.gitignore` / `.gitkeep`**: Professional workspace configuration files restricting giant binaries from being uploaded to source control.
 
 ---
