@@ -19,9 +19,9 @@ streamlit run app.py
 
 ---
 
-### ✅ خريطة استيفاء متطلبات المشروع (Project Rubric Mapping)
+### ✅ جدول التقنيات المستخدمة في المشروع (Project Technologies Mapping)
 
-| الشرط / المهمة (Requirement) | الحالة (Status) | التفاصيل وأين تم تحقيقها في الكود (How it was achieved) |
+| التقنية (Technology) | الحالة (Status) | التفاصيل وأين تم تحقيقها في الكود (How it was achieved) |
 | :--- | :---: | :--- |
 | **المرحلة الأولى (Phase 1)** | | |
 | **1. التعديل على نموذج (SLM) باستخدام Unsloth/QLoRA** | ✔️ محقق | تم إنجاز التدريب والتعديل (Fine-Tuning) لنموذج `SciAssistant` مسبقاً عبر منصة Kaggle، والكود متوفر في مجلد `model_training/`. |
@@ -143,9 +143,9 @@ Welcome to the **AI Research Assistant Agent** project. This repository hosts an
 
 ---
 
-### ✅ Project Rubric Mapping
+### ✅ Project Technologies Mapping
 
-| Requirement | Status | How it was achieved in the code |
+| Technology | Status | How it was achieved in the code |
 | :--- | :---: | :--- |
 | **Phase 1** | | |
 | **1. Fine-tune an SLM using Unsloth/QLoRA** | ✔️ Achieved | The Fine-Tuning for the `SciAssistant` model was completed via Kaggle, and the code is available in the `model_training/` directory. |
